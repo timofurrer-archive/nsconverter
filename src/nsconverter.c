@@ -1,3 +1,16 @@
+/*
+ *
+ * @author Timo Furrer
+ *
+ * @version 0.00.01
+ * @copyright GNU General Public License
+ *
+ * @reopsitory https://github.com/timofurrer/nsconverter
+ *
+ */
+
+#include "nsconverter.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -6,8 +19,6 @@
 #define USAGE          "Usage: %s <inputbase> <outputbase> <number>\n"
 #define INPUT_BUF_MAX  13
 #define OUTPUT_BUF_MAX 256
-
-int convert( char *input, int inputBase, int outputBase );
 
 int main( int argc, char **argv )
 {
