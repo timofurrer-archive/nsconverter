@@ -3,8 +3,9 @@
 #include <string.h>
 #include <math.h>
 
-#define USAGE         "Usage: %s <inputbase> <outputbase> <number>\n"
-#define INPUT_BUF_MAX 32
+#define USAGE          "Usage: %s <inputbase> <outputbase> <number>\n"
+#define INPUT_BUF_MAX  13
+#define OUTPUT_BUF_MAX 256
 
 int convert( char *input, int inputBase, int outputBase );
 
@@ -12,13 +13,13 @@ int main( int argc, char **argv )
 {
   int inputBase  = -1;
   int outputBase = -1;
-  char input[INPUT_BUF_MAX] = { 0 };
+  char input[INPUT_BUF_MAX];
 
   if( argc == 1 )
   {
     // FIXME: check for valid values
-    printf( "Please input a number from any system to convert: " );
-    scanf( "%s", &input );
+    printf( "Please input a number from any system to convert (just %d digits are read): ", INPUT_BUF_MAX );
+    scanf( "%13s", input );
 
     printf( "Please input the base of the number you put in before: " );
     scanf( "%d", &inputBase );
@@ -37,19 +38,26 @@ int main( int argc, char **argv )
     // FIXME: check for valid values
     inputBase  = atoi( argv[1] );
     outputBase = atoi( argv[2] );
+    if( strlen( argv[3] ) > INPUT_BUF_MAX )
+      printf( "Warning: Just %d digits of your %ld passed digits are read\n", INPUT_BUF_MAX, strlen( argv[3] ));
     strncpy( input, argv[3], INPUT_BUF_MAX );
   }
 
   // convert and print result
-  convert( input, inputBase, outputBase );
+  if( convert( input, inputBase, outputBase ) != 0 )
+  {
+    fprintf( stderr, "Error: The number %s is not valid in numbering system with base %d!\n", input, inputBase );
+    return EXIT_FAILURE;
+  }
 
   return EXIT_SUCCESS;
 }
 
 int convert( char *input, int inputBase, int outputBase )
 {
-  int result[INPUT_BUF_MAX] = { 0 };
-  int decimal               = 0;
+  int result[OUTPUT_BUF_MAX] = { 0 };
+  long long int decimal      = 0;
+  int firstOcc               = 0;
   int i;
 
   for( i = strlen( input ) - 1; i >= 0; i-- )
@@ -64,6 +72,9 @@ int convert( char *input, int inputBase, int outputBase )
     else
       return 1; // unsupported character
 
+    if( tmp >= inputBase )
+      return 1; // unsupported character
+
     decimal += tmp * pow( inputBase, strlen( input ) - 1 - i );
   }
 
@@ -73,17 +84,25 @@ int convert( char *input, int inputBase, int outputBase )
     decimal /= outputBase;
   }
 
-  for( i = INPUT_BUF_MAX - 1; i >= 0; i-- )
+  printf( "%s(%d) => ", input, inputBase );
+  for( i = OUTPUT_BUF_MAX - 1; i >= 0; i-- )
   {
-    if( result[i] >= 10 )
-      printf( "%c", result[i] + 55 );
-    else
-      printf( "%d", result[i] );
+    if( firstOcc == 1 )
+    {
+      if( result[i] >= 10 )
+        printf( "%c", result[i] + 55 );
+      else
+        printf( "%d", result[i] );
 
-    if( i % 8 == 0 )
-      printf( " " );
+      if( i % 8 == 0 && i != 0 )
+        printf( " " );
+      continue;
+    }
+
+    if( firstOcc == 0 && result[i] == 0 && result[i - 1] != 0 )
+      firstOcc = 1;
   }
-  printf( "\n" );
+  printf( "(%d)\n", outputBase );
 
   return 0;
 }
