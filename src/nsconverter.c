@@ -17,21 +17,24 @@
 #include <math.h>
 
 // usage
-#define USAGE              "Usage: %s <inputbase> <outputbase> <number>\n"
+#define USAGE               "Usage: %s <inputbase> <outputbase> <number>\n"
 
 // return values
-#define CONVERT_SUCCESSFUL 0
-#define E_UNSUPPORTED_CHAR 1
+#define CONVERT_SUCCESSFUL  0
+#define E_UNSUPPORTED_CHAR  1
+#define E_ALLOCATION_FAILED 2
 
 // buffers
-#define INPUT_BUF_MAX      13
-#define OUTPUT_BUF_MAX     256
+#define INPUT_BUF_MAX       13
+#define OUTPUT_BUF_MAX      256
 
 int main( int argc, char **argv )
 {
+  int ret;
   int inputBase  = -1;
   int outputBase = -1;
   char input[INPUT_BUF_MAX];
+  char *result = malloc( 0 );
 
   if( argc == 1 )
   {
@@ -61,22 +64,41 @@ int main( int argc, char **argv )
     strncpy( input, argv[3], INPUT_BUF_MAX );
   }
 
-  // convert and print result
-  if( convert( input, inputBase, outputBase ) != CONVERT_SUCCESSFUL )
+  // convert
+  if(( ret = convert( input, inputBase, outputBase, result )) != CONVERT_SUCCESSFUL )
   {
-    fprintf( stderr, "Error: The number %s is not valid in numbering system with base %d!\n", input, inputBase );
+    switch( ret )
+    {
+      case E_UNSUPPORTED_CHAR:
+      {
+        fprintf( stderr, "Error: The number %s is not valid in numbering system with base %d!\n", input, inputBase );
+        break;
+      }
+      case E_ALLOCATION_FAILED:
+      {
+        fprintf( stderr, "Error: Allocation for result buffer failed!\n" );
+        break;
+      }
+      default:
+      {
+        fprintf( stderr, "Error: Unkown error occured!\n" );
+      }
+    }
     return EXIT_FAILURE;
   }
+
+  // print result
+  printf( "%s(%d) => %s(%d)\n", input, inputBase, result, outputBase );
 
   return EXIT_SUCCESS;
 }
 
-int convert( char *input, int inputBase, int outputBase )
+int convert( char *input, int inputBase, int outputBase, char *result )
 {
-  int result[OUTPUT_BUF_MAX] = { 0 };
-  long long int decimal      = 0;
-  int firstOcc               = 0;
-  int i;
+  int calculated[OUTPUT_BUF_MAX] = { 0 };
+  long long int decimal          = 0;
+  int length                     = 0;
+  int i, j;
 
   for( i = strlen( input ) - 1; i >= 0; i-- )
   {
@@ -98,29 +120,23 @@ int convert( char *input, int inputBase, int outputBase )
 
   for( i = 0; decimal > 0; i++ )
   {
-    result[i] = decimal % outputBase;
+    calculated[i] = decimal % outputBase;
     decimal /= outputBase;
   }
 
-  printf( "%s(%d) => ", input, inputBase );
-  for( i = OUTPUT_BUF_MAX - 1; i >= 0; i-- )
-  {
-    if( firstOcc == 1 )
-    {
-      if( result[i] >= 10 )
-        printf( "%c", result[i] + 55 );
-      else
-        printf( "%d", result[i] );
+  // set buffer length
+  length = i;
 
-      if( i % 8 == 0 && i != 0 )
-        printf( " " );
-      continue;
-    }
+  // reallocate buffer memory
+  result = (char *)realloc( result, length * sizeof( char ) + 1 );
 
-    if( firstOcc == 0 && result[i] == 0 && result[i - 1] != 0 )
-      firstOcc = 1;
-  }
-  printf( "(%d)\n", outputBase );
+  if( result == NULL )
+    return E_ALLOCATION_FAILED;
+
+  // write in buffer
+  for( i = length - 1, j = 0; i >= 0; i--, j++ )
+    result[j] = calculated[i] + ((calculated[i] >= 10) ? 55 : 48);
+  result[j] = '\0';
 
   return CONVERT_SUCCESSFUL;
 }

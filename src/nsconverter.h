@@ -18,4 +18,4 @@
  *
  * @return integer   return 0 if it was successful and >0 if the conversation failed
  */
-int convert( char *input, int inputBase, int outputBase );
+int convert( char *input, int inputBase, int outputBase, char *result );
