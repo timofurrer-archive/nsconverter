@@ -2,7 +2,7 @@
  *
  * @author Timo Furrer
  *
- * @version 0.00.01
+ * @version 0.00.02
  * @copyright GNU General Public License
  *
  * @reopsitory https://github.com/timofurrer/nsconverter

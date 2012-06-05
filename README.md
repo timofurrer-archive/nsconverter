@@ -1,9 +1,9 @@
 # Number system converter
 > This smart tool converts a number from any numbering system to any other<br />
-> *Version: 0.00.01*
+> *Version: 0.00.02*
 
 **Author:** Timo Furrer<br />
-**Version:** 0.00.01<br />
+**Version:** 0.00.02<br />
 **Copyright:** GPL<br />
 
 ## How to use

@@ -2,7 +2,7 @@
  *
  * @author Timo Furrer
  *
- * @version 0.00.01
+ * @version 0.00.02
  * @copyright GNU General Public License
  *
  * @reopsitory https://github.com/timofurrer/nsconverter
@@ -84,12 +84,17 @@ int main( int argc, char **argv )
         fprintf( stderr, "Error: Unkown error occured!\n" );
       }
     }
+
+    // freeing result and exit with failure
+    free( result );
     return EXIT_FAILURE;
   }
 
   // print result
   printf( "%s(%d) => %s(%d)\n", input, inputBase, result, outputBase );
 
+  // freeing result and exit with success
+  free( result );
   return EXIT_SUCCESS;
 }
 
@@ -118,24 +123,25 @@ int convert( char *input, int inputBase, int outputBase, char *result )
     decimal += tmp * pow( inputBase, strlen( input ) - 1 - i );
   }
 
-  for( i = 0; decimal > 0; i++ )
+  i = 0;
+  while( decimal > 0 )
   {
-    calculated[i] = decimal % outputBase;
-    decimal /= outputBase;
+    calculated[i++]  = decimal % outputBase;
+    decimal         /= outputBase;
   }
 
   // set buffer length
   length = i;
 
   // reallocate buffer memory
-  result = (char *)realloc( result, length * sizeof( char ) + 1 );
+  result = (char *) realloc( result, length * sizeof( char ) + 1 );
 
   if( result == NULL )
     return E_ALLOCATION_FAILED;
 
   // write in buffer
   for( i = length - 1, j = 0; i >= 0; i--, j++ )
-    result[j] = calculated[i] + ((calculated[i] >= 10) ? 55 : 48);
+    result[j] = calculated[i] + (( calculated[i] >= 10 ) ? 55 : 48 );
   result[j] = '\0';
 
   return CONVERT_SUCCESSFUL;
