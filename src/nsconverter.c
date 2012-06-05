@@ -16,9 +16,16 @@
 #include <string.h>
 #include <math.h>
 
-#define USAGE          "Usage: %s <inputbase> <outputbase> <number>\n"
-#define INPUT_BUF_MAX  13
-#define OUTPUT_BUF_MAX 256
+// usage
+#define USAGE              "Usage: %s <inputbase> <outputbase> <number>\n"
+
+// return values
+#define CONVERT_SUCCESSFUL 0
+#define E_UNSUPPORTED_CHAR 1
+
+// buffers
+#define INPUT_BUF_MAX      13
+#define OUTPUT_BUF_MAX     256
 
 int main( int argc, char **argv )
 {
@@ -55,7 +62,7 @@ int main( int argc, char **argv )
   }
 
   // convert and print result
-  if( convert( input, inputBase, outputBase ) != 0 )
+  if( convert( input, inputBase, outputBase ) != CONVERT_SUCCESSFUL )
   {
     fprintf( stderr, "Error: The number %s is not valid in numbering system with base %d!\n", input, inputBase );
     return EXIT_FAILURE;
@@ -81,10 +88,10 @@ int convert( char *input, int inputBase, int outputBase )
     else if( input[i] >= 'a' && input[i] <= 'z' )
       tmp = input[i] - 87;
     else
-      return 1; // unsupported character
+      return E_UNSUPPORTED_CHAR;
 
     if( tmp >= inputBase )
-      return 1; // unsupported character
+      return E_UNSUPPORTED_CHAR;
 
     decimal += tmp * pow( inputBase, strlen( input ) - 1 - i );
   }
@@ -115,5 +122,5 @@ int convert( char *input, int inputBase, int outputBase )
   }
   printf( "(%d)\n", outputBase );
 
-  return 0;
+  return CONVERT_SUCCESSFUL;
 }
