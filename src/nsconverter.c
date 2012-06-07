@@ -59,13 +59,13 @@ int main( int argc, char **argv )
 
     if( validateBase( inputBase ) == INVALID_BASE )
     {
-      fprintf( stderr, "\nError: Please specify an input base between %d and %d using the option `-i`!\n", BASE_MIN, BASE_MAX );
+      fprintf( stderr, "Error: Please specify an input base between %d and %d using the option `-i`!\n", BASE_MIN, BASE_MAX );
       return EXIT_FAILURE;
     }
 
     if( validateBase( outputBase ) == INVALID_BASE )
     {
-      fprintf( stderr, "\nError: Please specify an output base between %d and %d using the option `-o`!\n", BASE_MIN, BASE_MAX );
+      fprintf( stderr, "Error: Please specify an output base between %d and %d using the option `-o`!\n", BASE_MIN, BASE_MAX );
       return EXIT_FAILURE;
     }
   }
@@ -97,17 +97,17 @@ int main( int argc, char **argv )
 
     if( validateBase( inputBase ) == INVALID_BASE )
     {
-      fprintf( stderr, "\nError: Please specify an input base between %d and %d using the option `-i`!\n", BASE_MIN, BASE_MAX );
+      fprintf( stderr, "Error: Please specify an input base between %d and %d using the option `-i`!\n", BASE_MIN, BASE_MAX );
       return EXIT_FAILURE;
     }
 
     if( validateBase( outputBase ) == INVALID_BASE )
     {
-      fprintf( stderr, "\nError: Please specify an output base between %d and %d using the option `-o`!\n", BASE_MIN, BASE_MAX );
+      fprintf( stderr, "Error: Please specify an output base between %d and %d using the option `-o`!\n", BASE_MIN, BASE_MAX );
       return EXIT_FAILURE;
     }
 
-    if( argc - optind == 0 )
+    if( !( argc - optind ))
     {
       fprintf( stderr, USAGE, *argv );
       fprintf( stderr, "\nError: Please specfiy the number to convert from base `%d` to `%d`!\n", inputBase, outputBase );
@@ -119,7 +119,7 @@ int main( int argc, char **argv )
     strncpy( input, argv[optind], INPUT_BUF_MAX );
   }
 
-  // allocate result biuffer memory (will be reallocated)
+  // allocate result buffer memory (will be reallocated)
   result = malloc( 0 );
 
   // convert
@@ -128,19 +128,13 @@ int main( int argc, char **argv )
     switch( ret )
     {
       case E_UNSUPPORTED_CHAR:
-      {
         fprintf( stderr, "Error: The number %s is not valid in numbering system with base %d!\n", input, inputBase );
         break;
-      }
       case E_ALLOCATION_FAILED:
-      {
         fprintf( stderr, "Error: Allocation for result buffer failed!\n" );
         break;
-      }
       default:
-      {
         fprintf( stderr, "Error: Unkown error occured!\n" );
-      }
     }
 
     // freeing result and exit with failure
