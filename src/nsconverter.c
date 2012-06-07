@@ -13,20 +13,29 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <ctype.h>
 #include <string.h>
 #include <math.h>
 
 // usage
-#define USAGE               "Usage: %s <inputbase> <outputbase> <number>\n"
+#define USAGE               "Usage: %s -i <inputbase> -o <outputbase> NUMBER\n"
 
 // return values
 #define CONVERT_SUCCESSFUL  0
 #define E_UNSUPPORTED_CHAR  1
 #define E_ALLOCATION_FAILED 2
 
+#define VALID_BASE          0
+#define INVALID_BASE        1
+
 // buffers
 #define INPUT_BUF_MAX       13
 #define OUTPUT_BUF_MAX      256
+
+// convert limits
+#define BASE_MIN            2
+#define BASE_MAX            32
 
 int main( int argc, char **argv )
 {
@@ -34,11 +43,11 @@ int main( int argc, char **argv )
   int inputBase  = -1;
   int outputBase = -1;
   char input[INPUT_BUF_MAX];
-  char *result = malloc( 0 );
+  char *result   = NULL;
+  char argument;
 
   if( argc == 1 )
   {
-    // FIXME: check for valid values
     printf( "Please input a number from any system to convert (just %d digits are read): ", INPUT_BUF_MAX );
     scanf( "%13s", input );
 
@@ -47,22 +56,71 @@ int main( int argc, char **argv )
 
     printf( "Please input the base of the output number system: " );
     scanf( "%d", &outputBase );
-  }
-  else
-  {
-    if( argc != 4 )
+
+    if( validateBase( inputBase ) == INVALID_BASE )
     {
-      fprintf( stderr, USAGE, *argv );
+      fprintf( stderr, "\nError: Please specify an input base between %d and %d using the option `-i`!\n", BASE_MIN, BASE_MAX );
       return EXIT_FAILURE;
     }
 
-    // FIXME: check for valid values
-    inputBase  = atoi( argv[1] );
-    outputBase = atoi( argv[2] );
-    if( strlen( argv[3] ) > INPUT_BUF_MAX )
-      printf( "Warning: Just %d digits of your %ld passed digits are read\n", INPUT_BUF_MAX, strlen( argv[3] ));
-    strncpy( input, argv[3], INPUT_BUF_MAX );
+    if( validateBase( outputBase ) == INVALID_BASE )
+    {
+      fprintf( stderr, "\nError: Please specify an output base between %d and %d using the option `-o`!\n", BASE_MIN, BASE_MAX );
+      return EXIT_FAILURE;
+    }
   }
+  else
+  {
+    // disable getopt error output
+    opterr = 0;
+    while(( argument = getopt( argc, argv, "i:o:" )) != -1 )
+    {
+      switch( argument )
+      {
+        case 'i':
+          inputBase  = atoi( optarg );
+          break;
+        case 'o':
+          outputBase = atoi( optarg );
+          break;
+        case '?':
+          if( optopt == 'c' )
+            fprintf( stderr, "Error: -%c requires an argument!\n", optopt );
+          else if( isprint( optopt ))
+            fprintf( stderr, "Error: Unknown option `-%c`!\n", optopt );
+          else
+            fprintf( stderr, "Error: Unkown option character `\\x%x`!.\n", optopt );
+        default:
+          return EXIT_FAILURE;
+      }
+    }
+
+    if( validateBase( inputBase ) == INVALID_BASE )
+    {
+      fprintf( stderr, "\nError: Please specify an input base between %d and %d using the option `-i`!\n", BASE_MIN, BASE_MAX );
+      return EXIT_FAILURE;
+    }
+
+    if( validateBase( outputBase ) == INVALID_BASE )
+    {
+      fprintf( stderr, "\nError: Please specify an output base between %d and %d using the option `-o`!\n", BASE_MIN, BASE_MAX );
+      return EXIT_FAILURE;
+    }
+
+    if( argc - optind == 0 )
+    {
+      fprintf( stderr, USAGE, *argv );
+      fprintf( stderr, "\nError: Please specfiy the number to convert from base `%d` to `%d`!\n", inputBase, outputBase );
+      return EXIT_FAILURE;
+    }
+
+    if( strlen( argv[optind] ) > INPUT_BUF_MAX )
+      printf( "Warning: Just %d digits of your %ld passed digits are read\n", INPUT_BUF_MAX, strlen( argv[3] ));
+    strncpy( input, argv[optind], INPUT_BUF_MAX );
+  }
+
+  // allocate result biuffer memory (will be reallocated)
+  result = malloc( 0 );
 
   // convert
   if(( ret = convert( input, inputBase, outputBase, result )) != CONVERT_SUCCESSFUL )
@@ -96,6 +154,11 @@ int main( int argc, char **argv )
   // freeing result and exit with success
   free( result );
   return EXIT_SUCCESS;
+}
+
+int validateBase( int base )
+{
+  return ( base >= BASE_MIN && base <= BASE_MAX ) ? VALID_BASE : INVALID_BASE;
 }
 
 int convert( char *input, int inputBase, int outputBase, char *result )

@@ -19,3 +19,12 @@
  * @return integer   return 0 if it was successful and >0 if the conversation failed
  */
 int convert( char *input, int inputBase, int outputBase, char *result );
+
+/**
+ * @brief Valide a base with minimum and maximum
+ *
+ * @param base     The base to validate
+ *
+ * @return integer if it was valid or not
+ */
+int validateBase( int base );
