@@ -40,11 +40,11 @@
 int main( int argc, char **argv )
 {
   int ret;
-  int inputBase  = -1;
-  int outputBase = -1;
+  int inputBase;
+  int outputBase;
   char input[INPUT_BUF_MAX];
-  char *result   = NULL;
   char argument;
+  char *result = NULL;
 
   if( argc == 1 )
   {
@@ -84,12 +84,12 @@ int main( int argc, char **argv )
           outputBase = atoi( optarg );
           break;
         case '?':
-          if( optopt == 'c' )
-            fprintf( stderr, "Error: -%c requires an argument!\n", optopt );
+          if( optopt == 'i' || optopt == 'o' )
+            fprintf( stderr, USAGE "\nError: option `-%c` requires an argument!\n", *argv, optopt );
           else if( isprint( optopt ))
-            fprintf( stderr, "Error: Unknown option `-%c`!\n", optopt );
+            fprintf( stderr, USAGE "\nError: Unknown option `-%c`!\n", *argv, optopt );
           else
-            fprintf( stderr, "Error: Unkown option character `\\x%x`!.\n", optopt );
+            fprintf( stderr, USAGE "\nError: Unkown option character `\\x%x`!.\n", *argv, optopt );
         default:
           return EXIT_FAILURE;
       }

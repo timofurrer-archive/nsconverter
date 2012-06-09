@@ -21,13 +21,19 @@ After you compiled successfully you can install it with make as well:
 ### Using
 Use the NSConverter like this:
 
-    Usage: nsconverter <inputbase> <outputbase> <number>
+    Usage: nsconverter -i <inputbase> -o <outputbase> NUMBER
+
+    $ nsconverter -i 10 -o 16 654321
 
 Or you don't pass any arguments and you will be prompt by nsconverter to enter the values.
 
-    Please input a number from any system to convert: 10
+    Please input a number from any system to convert: 654321
     Please input the base of the number you put in before: 10
     Please input the base of the output number system: 16
+
+In both cases the output looks like this:
+
+    654321(10) => 9FBF1(16)
 
 ### Uninstall
 To unintall use `make uninstall`:
